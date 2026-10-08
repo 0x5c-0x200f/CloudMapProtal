@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloudmap-portal"
+version = "0.12.0"
+description = "CloudMap: scan a cloud, get an inventory file, explore it in a portal"
+requires-python = ">=3.10"
+dependencies = ["flask>=3.0"]
+
+[project.optional-dependencies]
+aws = ["boto3>=1.34"]
+azure = ["azure-identity>=1.15", "azure-mgmt-resourcegraph>=8.0", "azure-mgmt-keyvault>=14.0", "azure-mgmt-web>=11.0"]
+gcp = ["google-cloud-asset>=3.24"]
+all = ["cloudmap-portal[aws,azure,gcp]"]
+dev = ["pytest>=8", "moto[ec2,rds,s3,iam,elbv2,sts]>=5"]
+
+[project.scripts]
+cloudmap-portal = "cloudmap_portal.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cloudmap_portal*"]
+
+[tool.setuptools.package-data]
+"cloudmap_portal.portal" = ["static/*"]
+"cloudmap_portal.scanners" = ["policies/*.json"]
