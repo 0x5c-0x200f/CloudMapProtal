@@ -1,0 +1,9 @@
+{
+  "provider": "gcp",
+  "summary": "Read-only. Needs the Cloud Asset API enabled and one viewer role on the scope you scan.",
+  "enable_api": "gcloud services enable cloudasset.googleapis.com --project <project-id>",
+  "role": "roles/cloudasset.viewer",
+  "assign_at": "the project, folder or organization you pass to --project / --folder / --organization",
+  "example": "gcloud projects add-iam-policy-binding <project-id> --member=user:<you@example.com> --role=roles/cloudasset.viewer",
+  "sign_in": "gcloud auth application-default login   (or point GOOGLE_APPLICATION_CREDENTIALS at a service account key)"
+}

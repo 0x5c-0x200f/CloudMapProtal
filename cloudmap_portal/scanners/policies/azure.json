@@ -1,0 +1,13 @@
+{
+  "provider": "azure",
+  "summary": "Read-only. The built-in Reader role is enough for the scan, including Key Vault item names and who has access.",
+  "role": "Reader",
+  "assign_at": "each subscription to scan, or a management group above them",
+  "example": "az role assignment create --assignee <user-or-service-principal> --role Reader --scope /subscriptions/<subscription-id>",
+  "sign_in": "az login   (or set AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_CLIENT_SECRET for a service principal)",
+  "key_vault": {
+    "reads": "secret, key and certificate NAMES and status (enabled, expiry), vault access policies, Key Vault role assignments, and which app settings reference which secret",
+    "never_reads": "secret values, key material, certificate contents or app setting values",
+    "note": "Listing items and role assignments works with Reader. The app Key Vault reference status may need more than Reader; if it is denied the scan reports it as an unreadable area and carries on. Use --skip-keyvault to skip all of this."
+  }
+}
