@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CloudMap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  try { document.documentElement.dataset.theme = localStorage.getItem('cloudmap-theme') ||
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js" defer></script>
+<script src="/static/app.js" defer></script>
+<script src="/static/agent.js" defer></script>
+<script src="/static/chat.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M6 17l6-10 6 10M6 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="7" r="2.6" fill="var(--l-compute)"/><circle cx="6" cy="17" r="2.6" fill="var(--l-network)"/><circle cx="18" cy="17" r="2.6" fill="var(--l-data)"/>
+    </svg>
+    <span>CloudMap</span>
+  </div>
+  <div class="scan" id="scan" hidden></div>
+  <div class="search" role="search">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <input id="q" type="text" placeholder="Search by name, tag or type. Press / to focus" aria-label="Search resources and show what they are connected to" autocomplete="off" spellcheck="false">
+    <button id="q-clear" class="q-clear" aria-label="Clear search" hidden>×</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn ai-btn" id="chat-open" data-chat-open aria-haspopup="dialog">✦ AI Chat</button>
+  <button class="btn" id="pick">Import scan file</button>
+  <div class="menu-wrap">
+    <button class="btn" id="share-btn" aria-haspopup="true" aria-expanded="false" disabled>Share</button>
+    <div class="menu" id="share-menu" hidden>
+      <button data-share="html"><b>Report</b><span>One HTML page anyone can open</span></button>
+      <button data-share="md"><b>Report as Markdown</b><span>For tickets and wikis</span></button>
+      <button data-share="png"><b>Map image</b><span>PNG of the network graph, SVG of the tree</span></button>
+      <button data-share="json"><b>Findings data</b><span>JSON for other tools</span></button>
+      <button data-share="link"><b>Copy link to this view</b><span>Works on this server only</span></button>
+    </div>
+  </div>
+  <button class="icon-btn" id="theme" aria-label="Switch between light and dark theme">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+  </button>
+  <input id="file" type="file" accept=".jsonci,.jsonl,.json" hidden>
+</header>
+
+<main class="app">
+  <aside class="rail" aria-label="Explorer">
+    <h2>Explorer</h2>
+    <div id="results"></div>
+    <div id="tree" class="tree"></div>
+  </aside>
+  <div class="split" id="split-rail" role="separator" aria-orientation="vertical" aria-label="Resize explorer" tabindex="0" title="Drag to resize. Double-click to hide or show."></div>
+
+  <section class="stage" id="stage" data-mode="structure" aria-label="Map">
+    <div id="cy" hidden></div>
+    <div id="struct" class="struct" tabindex="0" aria-label="Structure map">
+      <div id="sheet" class="sheet">
+        <div id="tree-root"></div>
+        <svg id="links" class="links" aria-hidden="true"></svg>
+      </div>
+      <svg id="tsvg" class="tsvg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Organization tree" hidden></svg>
+    </div>
+    <div class="viewsw" role="group" aria-label="Map view">
+      <button data-view="structure" aria-pressed="true">Structure</button>
+      <button data-view="tree" aria-pressed="false">Tree graph</button>
+      <button data-view="graph" aria-pressed="false">Network graph</button>
+    </div>
+    <div class="layers" id="legend"></div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="note" id="canvas-note" hidden></div>
+    <div class="viewbar">
+      <button class="btn sm" data-only="structure tree" data-act="expandall">Expand all</button>
+      <button class="btn sm" data-only="structure tree" data-act="collapseall">Collapse all</button>
+      <button class="btn sm" data-only="structure tree" id="links-toggle" data-act="links" aria-pressed="false">Show all relationships</button>
+      <span id="links-note" class="links-note" data-only="structure tree" role="status"></span>
+      <button class="btn sm" data-only="graph" id="labels" data-act="labels" aria-pressed="false">Relationship labels</button>
+      <button class="btn sm" data-only="graph tree" id="quiet" data-act="quiet" aria-pressed="true" title="Hide lines into shared roles and security groups until you select something">Quiet mode</button>
+    </div>
+    <div class="treekey" data-only="tree" aria-hidden="true">
+      <span><svg width="34" height="14"><path d="M1 12H12V2H33" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.6"/></svg>contains</span>
+      <span class="k-out"><svg width="34" height="14"><path d="M1 12C14 12 20 2 31 2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>depends on</span>
+      <span class="k-in"><svg width="34" height="14"><path d="M1 12C14 12 20 2 31 2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>used by</span>
+      <span class="k-agg"><svg width="34" height="14"><path d="M1 12C14 12 20 2 31 2" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2.6"/></svg>related, thicker means more</span>
+    </div>
+    <div class="tools">
+      <button class="icon-btn" data-act="zoomin" aria-label="Zoom in">+</button>
+      <button class="icon-btn" data-act="zoomout" aria-label="Zoom out">−</button>
+      <button class="icon-btn" data-act="fit" aria-label="Fit map to screen">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+      </button>
+    </div>
+    <div class="empty" id="empty">
+      <div class="drop" id="drop">
+        <h1>Open a cloud scan</h1>
+        <p>Drop a file named like <code>azure-3f9a2c1b-2026-10-06.jsonci</code> here. AWS, Azure and GCP scans all work, and the file stays on this machine. No scan yet? Try a demo.</p>
+        <div class="row">
+          <button class="btn primary" data-act="pick">Choose file</button>
+          <button class="btn" data-act="demo" data-provider="aws">AWS demo</button>
+          <button class="btn" data-act="demo" data-provider="azure">Azure demo</button>
+          <button class="btn" data-act="demo" data-provider="gcp">GCP demo</button>
+        </div>
+        <div id="recent"></div>
+        <p class="msg err" id="import-error" role="alert" hidden></p>
+      </div>
+    </div>
+  </section>
+  <div class="split" id="split-insp" role="separator" aria-orientation="vertical" aria-label="Resize details panel" tabindex="0" title="Drag to resize. Double-click to hide or show."></div>
+
+  <aside class="inspector" aria-label="Details">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-briefing" aria-selected="true" aria-controls="briefing" data-tab="briefing">Briefing</button>
+      <button role="tab" id="tab-resource" aria-selected="false" aria-controls="resource" data-tab="resource">Resource</button>
+      <button role="tab" id="tab-agent" aria-selected="false" aria-controls="agent" data-tab="agent">Agent</button>
+    </div>
+    <div id="briefing" role="tabpanel" aria-labelledby="tab-briefing"><p class="muted">Import a scan to see what it says about your cloud.</p></div>
+    <div id="resource" role="tabpanel" aria-labelledby="tab-resource" hidden><p class="muted">Select a resource on the map or in the explorer.</p></div>
+    <div id="agent" role="tabpanel" aria-labelledby="tab-agent" hidden><p class="muted">Import a scan and the agent will review it for unused resources, misconfiguration and security issues.</p></div>
+  </aside>
+</main>
+<button class="chat-fab" id="chat-fab" data-chat-open aria-label="Open AI Chat">✦ <span>AI Chat</span></button>
+<aside id="chat" class="chat" role="dialog" aria-label="AI Chat" hidden></aside>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
