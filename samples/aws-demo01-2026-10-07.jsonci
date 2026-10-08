@@ -1,0 +1,105 @@
+{"type":"meta","schema":"1.0","provider":"aws","scan_id":"demo01","scanned_at":"2026-10-07T16:30:01Z","scope":{"accounts":["123456789012"],"regions":["eu-west-1","us-east-1"],"demo":true},"tool_version":"0.1.0"}
+{"type":"node","id":"aws:acct:123456789012","kind":"account","name":"prod-main","parent":null,"native_type":"AWS::Account"}
+{"type":"node","id":"aws:iam:role/api-role","kind":"iam.role","name":"api-role","parent":"aws:acct:123456789012","native_type":"AWS::IAM::Role"}
+{"type":"node","id":"aws:iam:role/worker-role","kind":"iam.role","name":"worker-role","parent":"aws:acct:123456789012","native_type":"AWS::IAM::Role"}
+{"type":"node","id":"aws:iam:role/etl-role","kind":"iam.role","name":"etl-role","parent":"aws:acct:123456789012","native_type":"AWS::IAM::Role"}
+{"type":"node","id":"aws:s3:acme-assets","kind":"storage.bucket","name":"acme-assets","parent":"aws:acct:123456789012","native_type":"AWS::S3::Bucket"}
+{"type":"node","id":"aws:s3:acme-logs","kind":"storage.bucket","name":"acme-logs","parent":"aws:acct:123456789012","native_type":"AWS::S3::Bucket"}
+{"type":"node","id":"aws:s3:acme-backups","kind":"storage.bucket","name":"acme-backups","parent":"aws:acct:123456789012","native_type":"AWS::S3::Bucket"}
+{"type":"node","id":"aws:region:123456789012:eu-west-1","kind":"region","name":"eu-west-1","parent":"aws:acct:123456789012","region":"eu-west-1"}
+{"type":"node","id":"aws:vpc:vpc-eu01","kind":"network.vpc","name":"main-eu","parent":"aws:region:123456789012:eu-west-1","native_type":"AWS::EC2::VPC","region":"eu-west-1","props":{"cidr":"10.0.0.0/16"},"tags":{"env":"prod"}}
+{"type":"node","id":"aws:sg:sg-eu-web","kind":"network.security_group","name":"web-sg","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::SecurityGroup","region":"eu-west-1","props":{"world_open_ports":["443"]}}
+{"type":"node","id":"aws:sg:sg-eu-app","kind":"network.security_group","name":"app-sg","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::SecurityGroup","region":"eu-west-1"}
+{"type":"node","id":"aws:sg:sg-eu-db","kind":"network.security_group","name":"db-sg","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::SecurityGroup","region":"eu-west-1"}
+{"type":"node","id":"aws:sg:sg-eu-legacy","kind":"network.security_group","name":"legacy-sg","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::SecurityGroup","region":"eu-west-1"}
+{"type":"node","id":"aws:subnet:subnet-eu-pub1","kind":"network.subnet","name":"public-1","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::Subnet","region":"eu-west-1","props":{"cidr":"10.0.1.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-eu-pub2","kind":"network.subnet","name":"public-2","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::Subnet","region":"eu-west-1","props":{"cidr":"10.0.2.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-eu-prv1","kind":"network.subnet","name":"private-1","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::Subnet","region":"eu-west-1","props":{"cidr":"10.0.11.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-eu-prv2","kind":"network.subnet","name":"private-2","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::Subnet","region":"eu-west-1","props":{"cidr":"10.0.12.0/24"}}
+{"type":"node","id":"aws:ec2:i-euweb0","kind":"compute.instance","name":"web-0","parent":"aws:subnet:subnet-eu-pub1","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"t3.large","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-euweb1","kind":"compute.instance","name":"web-1","parent":"aws:subnet:subnet-eu-pub2","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"t3.medium","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-euweb2","kind":"compute.instance","name":"web-2","parent":"aws:subnet:subnet-eu-pub1","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"t3.large","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-euweb3","kind":"compute.instance","name":"web-3","parent":"aws:subnet:subnet-eu-pub2","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"t3.medium","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-euapp0","kind":"compute.instance","name":"app-0","parent":"aws:subnet:subnet-eu-prv1","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:ec2:i-euapp1","kind":"compute.instance","name":"app-1","parent":"aws:subnet:subnet-eu-prv2","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:ec2:i-euapp2","kind":"compute.instance","name":"app-2","parent":"aws:subnet:subnet-eu-prv1","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:sg:sg-eu-bastion","kind":"network.security_group","name":"bastion-sg","parent":"aws:vpc:vpc-eu01","native_type":"AWS::EC2::SecurityGroup","region":"eu-west-1","props":{"world_open_ports":["22"]},"tags":{"env":"prod"}}
+{"type":"node","id":"aws:ec2:i-eubastion","kind":"compute.instance","name":"bastion","parent":"aws:subnet:subnet-eu-pub1","native_type":"AWS::EC2::Instance","region":"eu-west-1","props":{"size":"t3.micro","state":"running"},"tags":{"env":"prod","tier":"ops"}}
+{"type":"node","id":"aws:elb:alb-eu","kind":"network.load_balancer","name":"public-alb-eu","parent":"aws:vpc:vpc-eu01","native_type":"AWS::ElasticLoadBalancingV2::LoadBalancer","region":"eu-west-1"}
+{"type":"node","id":"aws:rds:orders-eu","kind":"data.database","name":"orders-eu","parent":"aws:vpc:vpc-eu01","native_type":"AWS::RDS::DBInstance","region":"eu-west-1","props":{"engine":"postgres","class":"db.r5.large","multi_az":true}}
+{"type":"node","id":"aws:lambda:thumbnailer-eu","kind":"compute.function","name":"thumbnailer-eu","parent":"aws:region:123456789012:eu-west-1","native_type":"AWS::Lambda::Function","region":"eu-west-1","props":{"runtime":"python3.12","memory_mb":512}}
+{"type":"node","id":"aws:lambda:etl-nightly-eu","kind":"compute.function","name":"etl-nightly-eu","parent":"aws:region:123456789012:eu-west-1","native_type":"AWS::Lambda::Function","region":"eu-west-1","props":{"runtime":"python3.12","memory_mb":512}}
+{"type":"node","id":"aws:region:123456789012:us-east-1","kind":"region","name":"us-east-1","parent":"aws:acct:123456789012","region":"us-east-1"}
+{"type":"node","id":"aws:vpc:vpc-us01","kind":"network.vpc","name":"main-us","parent":"aws:region:123456789012:us-east-1","native_type":"AWS::EC2::VPC","region":"us-east-1","props":{"cidr":"10.0.0.0/16"},"tags":{"env":"prod"}}
+{"type":"node","id":"aws:sg:sg-us-web","kind":"network.security_group","name":"web-sg","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::SecurityGroup","region":"us-east-1","props":{"world_open_ports":["443"]}}
+{"type":"node","id":"aws:sg:sg-us-app","kind":"network.security_group","name":"app-sg","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::SecurityGroup","region":"us-east-1"}
+{"type":"node","id":"aws:sg:sg-us-db","kind":"network.security_group","name":"db-sg","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::SecurityGroup","region":"us-east-1"}
+{"type":"node","id":"aws:subnet:subnet-us-pub1","kind":"network.subnet","name":"public-1","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::Subnet","region":"us-east-1","props":{"cidr":"10.0.1.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-us-pub2","kind":"network.subnet","name":"public-2","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::Subnet","region":"us-east-1","props":{"cidr":"10.0.2.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-us-prv1","kind":"network.subnet","name":"private-1","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::Subnet","region":"us-east-1","props":{"cidr":"10.0.11.0/24"}}
+{"type":"node","id":"aws:subnet:subnet-us-prv2","kind":"network.subnet","name":"private-2","parent":"aws:vpc:vpc-us01","native_type":"AWS::EC2::Subnet","region":"us-east-1","props":{"cidr":"10.0.12.0/24"}}
+{"type":"node","id":"aws:ec2:i-usweb0","kind":"compute.instance","name":"web-0","parent":"aws:subnet:subnet-us-pub1","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"t3.medium","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-usweb1","kind":"compute.instance","name":"web-1","parent":"aws:subnet:subnet-us-pub2","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"t3.large","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-usweb2","kind":"compute.instance","name":"web-2","parent":"aws:subnet:subnet-us-pub1","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"t3.medium","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-usweb3","kind":"compute.instance","name":"web-3","parent":"aws:subnet:subnet-us-pub2","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"t3.medium","state":"running"},"tags":{"env":"prod","tier":"web"}}
+{"type":"node","id":"aws:ec2:i-usapp0","kind":"compute.instance","name":"app-0","parent":"aws:subnet:subnet-us-prv1","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:ec2:i-usapp1","kind":"compute.instance","name":"app-1","parent":"aws:subnet:subnet-us-prv2","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:ec2:i-usapp2","kind":"compute.instance","name":"app-2","parent":"aws:subnet:subnet-us-prv1","native_type":"AWS::EC2::Instance","region":"us-east-1","props":{"size":"m5.large","state":"running"},"tags":{"tier":"app"}}
+{"type":"node","id":"aws:elb:alb-us","kind":"network.load_balancer","name":"public-alb-us","parent":"aws:vpc:vpc-us01","native_type":"AWS::ElasticLoadBalancingV2::LoadBalancer","region":"us-east-1"}
+{"type":"node","id":"aws:rds:orders-us","kind":"data.database","name":"orders-us","parent":"aws:vpc:vpc-us01","native_type":"AWS::RDS::DBInstance","region":"us-east-1","props":{"engine":"postgres","class":"db.r5.large","multi_az":false}}
+{"type":"node","id":"aws:lambda:thumbnailer-us","kind":"compute.function","name":"thumbnailer-us","parent":"aws:region:123456789012:us-east-1","native_type":"AWS::Lambda::Function","region":"us-east-1","props":{"runtime":"python3.12","memory_mb":512}}
+{"type":"node","id":"aws:lambda:etl-nightly-us","kind":"compute.function","name":"etl-nightly-us","parent":"aws:region:123456789012:us-east-1","native_type":"AWS::Lambda::Function","region":"us-east-1","props":{"runtime":"python3.12","memory_mb":512}}
+{"type":"edge","from":"aws:sg:sg-eu-web","to":"aws:sg:sg-eu-app","rel":"allows_traffic_to"}
+{"type":"edge","from":"aws:sg:sg-eu-app","to":"aws:sg:sg-eu-db","rel":"allows_traffic_to"}
+{"type":"edge","from":"aws:ec2:i-euweb0","to":"aws:sg:sg-eu-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euweb0","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euweb1","to":"aws:sg:sg-eu-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euweb1","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euweb2","to":"aws:sg:sg-eu-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euweb2","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euweb3","to":"aws:sg:sg-eu-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euweb3","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euapp0","to":"aws:sg:sg-eu-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euapp0","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euapp1","to":"aws:sg:sg-eu-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euapp1","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-euapp2","to":"aws:sg:sg-eu-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-euapp2","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-eubastion","to":"aws:sg:sg-eu-bastion","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-eubastion","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:elb:alb-eu","to":"aws:ec2:i-euweb0","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-eu","to":"aws:ec2:i-euweb1","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-eu","to":"aws:ec2:i-euweb2","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-eu","to":"aws:ec2:i-euweb3","rel":"routes_to"}
+{"type":"edge","from":"aws:rds:orders-eu","to":"aws:sg:sg-eu-db","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:lambda:thumbnailer-eu","to":"aws:iam:role/worker-role","rel":"assumes","label":"execution role"}
+{"type":"edge","from":"aws:lambda:thumbnailer-eu","to":"aws:s3:acme-assets","rel":"reads_from"}
+{"type":"edge","from":"aws:lambda:etl-nightly-eu","to":"aws:iam:role/etl-role","rel":"assumes","label":"execution role"}
+{"type":"edge","from":"aws:lambda:etl-nightly-eu","to":"aws:s3:acme-backups","rel":"reads_from"}
+{"type":"edge","from":"aws:sg:sg-us-web","to":"aws:sg:sg-us-app","rel":"allows_traffic_to"}
+{"type":"edge","from":"aws:sg:sg-us-app","to":"aws:sg:sg-us-db","rel":"allows_traffic_to"}
+{"type":"edge","from":"aws:ec2:i-usweb0","to":"aws:sg:sg-us-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usweb0","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usweb1","to":"aws:sg:sg-us-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usweb1","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usweb2","to":"aws:sg:sg-us-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usweb2","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usweb3","to":"aws:sg:sg-us-web","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usweb3","to":"aws:iam:role/api-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usapp0","to":"aws:sg:sg-us-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usapp0","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usapp1","to":"aws:sg:sg-us-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usapp1","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:ec2:i-usapp2","to":"aws:sg:sg-us-app","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:ec2:i-usapp2","to":"aws:iam:role/worker-role","rel":"assumes"}
+{"type":"edge","from":"aws:elb:alb-us","to":"aws:ec2:i-usweb0","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-us","to":"aws:ec2:i-usweb1","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-us","to":"aws:ec2:i-usweb2","rel":"routes_to"}
+{"type":"edge","from":"aws:elb:alb-us","to":"aws:ec2:i-usweb3","rel":"routes_to"}
+{"type":"edge","from":"aws:rds:orders-us","to":"aws:sg:sg-us-db","rel":"uses","label":"security group"}
+{"type":"edge","from":"aws:lambda:thumbnailer-us","to":"aws:iam:role/worker-role","rel":"assumes","label":"execution role"}
+{"type":"edge","from":"aws:lambda:thumbnailer-us","to":"aws:s3:acme-assets","rel":"reads_from"}
+{"type":"edge","from":"aws:lambda:etl-nightly-us","to":"aws:iam:role/etl-role","rel":"assumes","label":"execution role"}
+{"type":"edge","from":"aws:lambda:etl-nightly-us","to":"aws:s3:acme-assets","rel":"reads_from"}
+{"type":"error","scope":"eu-west-1/collect_elasticache","message":"AccessDenied (demo of a partial scan)"}
+{"type":"error","scope":"us-east-1/collect_elasticache","message":"AccessDenied (demo of a partial scan)"}
